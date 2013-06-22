@@ -12,7 +12,8 @@ static string HelperFolderName="Help";
 //change here the default content of the file
 string TextFile = "<html><body>This is the help file for the view {0}</body></html>";
 
-
+Use: <a href='@Url.Content("~/Help/Views/Home/Index.cshtml")' target="_blank">Index Help</a>
+More details at http://msprogrammer.serviciipeweb.ro/2013/06/22/mvc-help-view-razor/
 License:
 
 Developer shall not be responsible for, and shall not pay, any amount of incidental, consequential or other indirect damages, whether based on lost revenue or otherwise, regardless of whether Developer was advised of the possibility of such losses in advance. In no event shall Developer's liability hereunder exceed the amount of license fees paid by Licensee, regardless of whether Licensee's claim is based on contract, tort, strict liability, product liability or otherwise. 
