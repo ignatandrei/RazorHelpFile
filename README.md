@@ -24,5 +24,5 @@ See blog post a http://msprogrammer.serviciipeweb.ro/
 Use: 
 Download .tt file
 Put this in index.cshtml file: 
-<a href='@Url.Content("~/Help/Views/Home/Index.cshtml")' target="_blank">Index Help</a>
+a href='@Url.Content("~/Help/Views/Home/Index.cshtml")' target="_blank">Index Help /a
 
