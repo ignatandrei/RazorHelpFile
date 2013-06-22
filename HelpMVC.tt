@@ -1,0 +1,125 @@
+﻿/*
+This file generates help view files for each view in an ASP.NET MVC project.
+
+Imagine you have a MVC site and you want to generated help for each view. This file generates for you the structure for having a view help file for each view that you have in the project.
+More, if the help file already exists in the project, it will be not overwritten.
+
+The template can be customized:
+-the folder name:
+//change here the location folder where the help files will be generated
+static string HelperFolderName="Help";
+-the content of the file
+//change here the default content of the file
+string TextFile = "<html><body>This is the help file for the view {0}</body></html>";
+
+
+License:
+
+Developer shall not be responsible for, and shall not pay, any amount of incidental, consequential or other indirect damages, whether based on lost revenue or otherwise, regardless of whether Developer was advised of the possibility of such losses in advance. In no event shall Developer's liability hereunder exceed the amount of license fees paid by Licensee, regardless of whether Licensee's claim is based on contract, tort, strict liability, product liability or otherwise. 
+*/
+<#@ output extension=".txt" #>
+<#@ template language="C#" debug="true" hostspecific="true" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="Microsoft.VisualStudio.Shell.Interop.8.0" #>
+<#@ assembly name="EnvDTE" #>
+<#@ assembly name="EnvDTE80" #>
+<#@ assembly name="VSLangProj" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#@ import namespace="Microsoft.VisualStudio.Shell.Interop" #>
+<#@ import namespace="EnvDTE" #>
+<#@ import namespace="EnvDTE80" #>
+<#@ import namespace="Microsoft.VisualStudio.TextTemplating" #>
+<# // To debug, uncomment the next two lines !! 
+// System.Diagnostics.Debugger.Launch();
+// System.Diagnostics.Debugger.Break();
+#>
+<#
+//change here the default content of the file
+string TextFile = "<html><body>This is the help file for the view {0}</body></html>";
+FindViews();
+
+#>
+<#=AppRoot#>
+
+<#foreach(var item in Views){
+	var nameHelp = item.Replace(AppRoot,helperFolder);
+	string alreadyExists=",already exists help file";
+	if(!File.Exists(nameHelp ))
+	{
+		var str= System.IO.Path.GetDirectoryName(nameHelp);
+        if (!System.IO.Directory.Exists(str))
+		{
+			System.IO.Directory.CreateDirectory(str);			
+		}
+		//Writes the help file
+		File.WriteAllText(nameHelp,string.Format(TextFile,Path.GetFileNameWithoutExtension(item)));
+		alreadyExists="";
+	}
+
+#>
+	Processing <#=item#> <#=alreadyExists#>	
+	
+<#}#>
+
+
+<#+
+static DTE Dte;
+static Project currentProject;
+static  string AppRoot;
+static string helperFolder;
+static List<string> Views;
+//change here the location folder where the help files will be generated
+static string HelperFolderName="Help";
+void FindViews(){
+
+ var serviceProvider = Host as IServiceProvider;
+	if (serviceProvider != null) {
+	   Dte = serviceProvider.GetService(typeof(SDTE)) as DTE;
+	}
+	
+	if (Dte == null) {
+		throw new Exception("HelpMVC can only execute through the Visual Studio host");
+	}
+	currentProject = GetProjectContainingTTFile(Dte);
+	
+    if (currentProject == null) {
+        throw new Exception("Could not find the VS Project containing the HelpMVC file.");        
+    }
+
+	 AppRoot = Path.GetDirectoryName(currentProject.FullName);
+	 helperFolder = Path.Combine(AppRoot ,HelperFolderName);
+	 Views = new List<string> ();
+	 foreach(var item in Directory.GetFiles(AppRoot,"*.cshtml", SearchOption.AllDirectories))
+	 {
+		if(item.IndexOf(helperFolder) == 0)
+			continue;
+		string fileName=Path.GetFileName(item).ToLower();
+		if(fileName == "_viewstart.cshtml")
+			continue;
+		if(fileName == "_layout.cshtml")
+			continue;
+
+		Views.Add(item);
+
+	 }
+
+}
+
+
+Project GetProjectContainingTTFile(DTE dte) {
+
+    ProjectItem projectItem = dte.Solution.FindProjectItem(Host.TemplateFile);
+    
+	if (projectItem.Document == null)
+        projectItem.Open(Constants.vsViewKindCode);
+    
+	return projectItem.ContainingProject;
+}
+
+
+
+#>
