@@ -14,6 +14,7 @@ static string HelperFolderName="Help";
 //change here the default content of the file
 string TextFile = "<html><body>This is the help file for the view {0}</body></html>";
 
+Now it wrotes also js file for each view - in order to maintain the separate js from view.
 
 License:
 

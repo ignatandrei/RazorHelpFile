@@ -8,12 +8,13 @@ The template can be customized:
 -the folder name:
 //change here the location folder where the help files will be generated
 static string HelperFolderName="Help";
+//change here the location folder where the js files will be generated
+static string HelperFolderNameJS="Scripts/Views";
 -the content of the file
 //change here the default content of the file
 string TextFile = "<html><body>This is the help file for the view {0}</body></html>";
+bool GenerateJsForViews=true;
 
-Use: <a href='@Url.Content("~/Help/Views/Home/Index.cshtml")' target="_blank">Index Help</a>
-More details at http://msprogrammer.serviciipeweb.ro/2013/06/22/mvc-help-view-razor/
 License:
 
 Developer shall not be responsible for, and shall not pay, any amount of incidental, consequential or other indirect damages, whether based on lost revenue or otherwise, regardless of whether Developer was advised of the possibility of such losses in advance. In no event shall Developer's liability hereunder exceed the amount of license fees paid by Licensee, regardless of whether Licensee's claim is based on contract, tort, strict liability, product liability or otherwise. 
@@ -40,7 +41,8 @@ Developer shall not be responsible for, and shall not pay, any amount of inciden
 #>
 <#
 //change here the default content of the file
-string TextFile = "<html><body>This is the help file for the view {0}</body></html>";
+string TextFileHelp = "<html><body>This is the help file for the view {0}</body></html>";
+string TextFileJs = "//This is the js file for the view {0}";
 FindViews();
 
 #>
@@ -48,7 +50,7 @@ FindViews();
 
 <#foreach(var item in Views){
 	var nameHelp = item.Replace(AppRoot,helperFolder);
-	string alreadyExists=",already exists help file";
+	string alreadyExistsHelp=",already exists help file";
 	if(!File.Exists(nameHelp ))
 	{
 		var str= System.IO.Path.GetDirectoryName(nameHelp);
@@ -57,12 +59,29 @@ FindViews();
 			System.IO.Directory.CreateDirectory(str);			
 		}
 		//Writes the help file
-		File.WriteAllText(nameHelp,string.Format(TextFile,Path.GetFileNameWithoutExtension(item)));
-		alreadyExists="";
+		File.WriteAllText(nameHelp,string.Format(TextFileHelp,Path.GetFileNameWithoutExtension(item)));
+		alreadyExistsHelp="";
+	}
+	string alreadyExistsJs=",already exists js file";
+	var nameJs=item.Replace(AppRoot,helperFolderJS).Replace(".cshtml",".js");
+	#>
+	<#
+	if(!File.Exists(nameJs ))
+	{
+		var str= System.IO.Path.GetDirectoryName(nameJs);
+        if (!System.IO.Directory.Exists(str))
+		{
+			System.IO.Directory.CreateDirectory(str);			
+		}
+		//Writes the help file
+		File.WriteAllText(nameJs,string.Format(TextFileJs,Path.GetFileNameWithoutExtension(item)));
+		alreadyExistsJs="";
 	}
 
+
+
 #>
-	Processing <#=item#> <#=alreadyExists#>	
+	Processing <#=item#> <#=alreadyExistsHelp#>	<#=alreadyExistsJs#>	
 	
 <#}#>
 
@@ -72,9 +91,13 @@ static DTE Dte;
 static Project currentProject;
 static  string AppRoot;
 static string helperFolder;
+static string helperFolderJS;
 static List<string> Views;
 //change here the location folder where the help files will be generated
 static string HelperFolderName="Help";
+//change here the location folder where the js files will be generated
+static string HelperFolderNameJS="Scripts/Views";
+
 void FindViews(){
 
  var serviceProvider = Host as IServiceProvider;
@@ -93,6 +116,7 @@ void FindViews(){
 
 	 AppRoot = Path.GetDirectoryName(currentProject.FullName);
 	 helperFolder = Path.Combine(AppRoot ,HelperFolderName);
+	 helperFolderJS= Path.Combine(AppRoot ,HelperFolderNameJS);
 	 Views = new List<string> ();
 	 foreach(var item in Directory.GetFiles(AppRoot,"*.cshtml", SearchOption.AllDirectories))
 	 {
